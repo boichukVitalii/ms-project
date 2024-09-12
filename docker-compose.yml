@@ -1,0 +1,50 @@
+version: "3.8"
+
+services:
+  auth-service-db:
+    image: postgres:13.2-alpine
+    ports:
+      - '5435:5432'
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=auth
+  auth-service:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        - APP_NAME=auth-service
+    command: >
+      sh -c "npm run migrate:deploy &&
+             npm run start:dev -- auth-service"
+    restart: on-failure
+    ports:
+      - 3000:3000
+    environment:
+      - POSTGRES_HOST=auth-service
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=auth
+    volumes:        
+      - ./libs:/usr/src/app/libs
+      - ./package.json:/usr/src/app/package.json    
+      - ./tsconfig.json:/usr/src/app/tsconfig.json   
+      - ./apps/auth-service:/usr/src/app/apps/auth-service
+    depends_on:
+      - auth-service-db
+  apple-notification-service:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        - APP_NAME=apple-notification-service
+    command: npm run start:dev -- apple-notification-service
+    volumes:        
+      - ./libs:/usr/src/app/libs
+      - ./package.json:/usr/src/app/package.json
+      - ./tsconfig.json:/usr/src/app/tsconfig.json      
+      - ./apps/apple-notification-service:/usr/src/app/apps/apple-notification-service
+    depends_on:
+      - auth-service
