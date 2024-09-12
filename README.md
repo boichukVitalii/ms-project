@@ -1,4 +1,4 @@
-# Clone this project, cd to the project root dir, provide .env file and run docker-compose up
+## Clone this project, cd to the project root dir, provide .env file and run docker-compose up
 
 ```bash
 # Prometheus Metrics URL
